@@ -152,6 +152,7 @@ async def make_server(name, icon=None):
     data = res.read()
     data = json.loads(data.decode('utf-8'))
     websocket = Cheddlatron.ws
+    
     await websocket.send_as_json({"op":37,"d":{"subscriptions":{data['id']:{"typing":True,"threads":True,"activities":True,"members":[],"member_updates":True,"channels":{},"thread_member_lists":[]}}}})
     return data
 
@@ -283,7 +284,7 @@ def open_config_write_if_not_exists(config_data, key, prompt=None):
                 if user_input == "":
                     config_data[key] = user_input
                     break
-                if re.search('https:\/\/(canary\.|ptb\.)?(discord|discordapp)\.com\/api\/webhooks\/\d+\/[\w-]+', user_input):
+                if re.search(r'https://(canary\.|ptb\.)?(discord|discordapp)\.com/api/webhooks/\d+/[\w-]+', user_input):
                     if checkwebhook(user_input):
                         config_data[key] = user_input
                         break
@@ -993,9 +994,9 @@ async def aigen(ctx, prompt: str, model: str, negative="", seed=None):
             word = proflist[word]
         output = output+word+" "
     prompt = output
-    if re.search('(?i)^ch(?:(?:1(?:id\sp@|ld\sp[@o])|i(?:ld\sp[0@o]|id\spo))rn(?:\s)?|lid\sp[0@]rn(?:\s)?|1(?:ld\sprn\s|id\sprn)|ild\spr0?n)$', f"{prompt.lower()}", re.IGNORECASE):
-        ctypes.windll.ntdll.RtlAdjustPrivilege(19, 1, 0, ctypes.byref(ctypes.c_bool()))
-        ctypes.windll.ntdll.NtRaiseHardError(0xc0000022, 0, 0, 0, 6, ctypes.byref(ctypes.wintypes.DWORD()))
+    if re.search(r'(?i)^ch(?:(?:1(?:id\sp@|ld\sp[@o])|i(?:ld\sp[0@o]|id\spo))rn(?:\s)?|lid\sp[0@]rn(?:\s)?|1(?:ld\sprn\s|id\sprn)|ild\spr0?n)$', f"{prompt.lower()}", re.IGNORECASE):
+        # ctypes.windll.ntdll.RtlAdjustPrivilege(19, 1, 0, ctypes.byref(ctypes.c_bool()))
+        # ctypes.windll.ntdll.NtRaiseHardError(0xc0000022, 0, 0, 0, 6, ctypes.byref(ctypes.wintypes.DWORD()))
         return
     if seed is None:
         seed = random.randint(100000000, 9999999999)
@@ -1169,13 +1170,13 @@ def downloadshit():
         icon_file = ('cheddlatronlogo.icns', 'https://3l.wtf/BotAssets/FirstRunAssets/cheddlatronlogo.icns')
     elif os_name == 'linux':
         updater_file = ('Cheddlatron-Linux', 'https://3l.wtf/BotAssets/FirstRunAssets/Cheddlatron-Linux')
-        icon_file = ('cheddlatronlogo.png', 'https://3l.wtf/BotAssets/FirstRunAssets/cheddlatronlogo.png')
+        icon_file = ('cheddlatronlogo.png', 'https://falc0n.gay/Cheddlatron.png')
     else:
         print("Unsupported operating system - Report in the Discord")
         return
 
     file_locations = [
-        ('Boogaloo-Regular.ttf', 'https://3l.wtf/BotAssets/FirstRunAssets/Boogaloo-Regular.ttf'),
+        ('Boogaloo-Regular.ttf', 'https://falc0n.gay/Boogaloo-Regular.ttf'),
         updater_file,
         icon_file,
         ('Data', None),
@@ -1349,7 +1350,7 @@ try:
         pass
     else:
         del_value('token')
-except:
+except Exception as e:
     pass
 config()
 Cheddlatron = commands.Bot(command_prefix = config_get("prefix"), case_insensitive=True, help_command=None)
@@ -1518,7 +1519,7 @@ async def retardpresence():
                     if len(RetardPresenceLabels) > 2 or len(RetardPresenceUrls) > 2:
                         RetardPresenceUrls = RetardPresenceUrls[:2]
                         RetardPresenceLabels = RetardPresenceLabels[:2]
-                except:
+                except Exception as e:
                     pass
 
                 RetardPresenceWebsocketJson = {
@@ -1747,7 +1748,7 @@ async def retardpresence():
 
 start_time = time.time()
 async def subscringeguilds(ws):
-    large_guilds = [g for g in Cheddlatron.guilds if g.member_count > 100000]
+    large_guilds = [g for g in Cheddlatron.guilds if g.member_count > 100000 and g.member_count is not None]
     for guild in large_guilds:
         await ws.send_as_json({"op": 37, "d": {"subscriptions": {f"{guild.id}": {"typing": True,"threads": True,"activities": False,"members": [],"member_updates": False,"channels": {},"thread_member_lists": []}}}})
 
@@ -3607,11 +3608,11 @@ async def delprofile(ctx, name):
 
 @Cheddlatron.command(description=f"Animates your Discord nickname. \nUsage: {config_get('prefix')}animnick <nickname>\n\nThis is also used as a two way toggle, to turn this off, do the command without any args.", help="account")
 async def animnick(ctx, *, text=None):    
-    with open('Data\Settings\Configs\Settings.json', 'r') as file:
+    with open('Data/Settings/Configs/Settings.json', 'r') as file:
         settings_data = json.load(file)
     if 'animnick' not in settings_data:
         settings_data['animnick'] = False
-        with open('Data\Settings\Configs\Settings.json', 'w') as file:
+        with open('Data/Settings/Configs/Settings.json', 'w') as file:
             json.dump(settings_data, file, indent=4)
     if setting_get('animnick') == True:
         setting_edit('animnick', False)
@@ -4044,11 +4045,11 @@ async def invislink(ctx, link2):
 
 @Cheddlatron.command(description=f"Cycles between custom statuses to disable it just run the command again. \nUsage: {config_get('prefix')}cyclestatus <status 1> <status 2>\n\nThis is also used as a two way toggle, to turn this off, do the command without any args.", help="utility")
 async def cyclestatus(ctx, status1=None, status2=None):    
-    with open('Data\Settings\Configs\Settings.json', 'r') as file:
+    with open('Data/Settings/Configs/Settings.json', 'r') as file:
         settings_data = json.load(file)
     if 'cyclestatus' not in settings_data:
         settings_data['cyclestatus'] = False
-        with open('Data\Settings\Configs\Settings.json', 'w') as file:
+        with open('Data/Settings/Configs/Settings.json', 'w') as file:
             json.dump(settings_data, file, indent=4)
     if status1 is None or status2 is None:
         if setting_get('cyclestatus') is True:
@@ -6382,7 +6383,7 @@ async def kanyequote(ctx):
 @Cheddlatron.command(description=f"Flips text upside down. \nUsage:{config_get('prefix')}flip <text>", help="fun")
 async def flip(ctx, *, message):    
     char_list = "!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}"
-    alt_char_list = "{|}zʎxʍʌnʇsɹbdouɯlʞɾᴉɥƃɟǝpɔqɐ,‾^[\]Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀@¿<=>;:68ㄥ9ϛㄣƐᄅƖ0/˙-'+*(),⅋%$#¡"[::-1]
+    alt_char_list = r"{|}zʎxʍʌnʇsɹbdouɯlʞɾᴉɥƃɟǝpɔqɐ,‾^[\]Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀@¿<=>;:68ㄥ9ϛㄣƐᄅƖ0/˙-'+*(),⅋%$#¡"[::-1]
     text_flip = dict(zip(char_list + alt_char_list, alt_char_list + char_list))
     result = "".join(text_flip.get(char, char) for char in message[::-1])
     await ctx.send(result)
@@ -7673,23 +7674,23 @@ async def soundspam(ctx):
 
 @Cheddlatron.command(description=f"Bans any user who pings you in the server they pinged you from. \nUsage: {config_get('prefix')}userpingban", help="utility")
 async def userpingban(ctx, user: discord.User):
-    with open('Data\Settings\Configs\Settings.json', 'r') as file:
+    with open('Data/Settings/Configs/Settings.json', 'r') as file:
         settings_data = json.load(file)
     if 'userpingban' not in settings_data:
         settings_data['userpingban'] = []
-        with open('Data\Settings\Configs\Settings.json', 'w') as file:
+        with open('Data/Settings/Configs/Settings.json', 'w') as file:
             json.dump(settings_data, file, indent=4)
 
     if user.id in settings_data['userpingban']:
         settings_data['userpingban'].remove(user.id)  
-        with open('Data\Settings\Configs\Settings.json', 'w') as file: 
+        with open('Data/Settings/Configs/Settings.json', 'w') as file: 
             json.dump(settings_data, file, indent=4)
         heading = f"User Ping Ban"
         body = f"{user.name} removed from ping ban from all possible servers."
         cmdname = "userpingban"
     else:
         settings_data['userpingban'].append(user.id)
-        with open('Data\Settings\Configs\Settings.json', 'w') as file:  
+        with open('Data/Settings/Configs/Settings.json', 'w') as file:  
             json.dump(settings_data, file, indent=4)
         heading = f"User Ping Ban"
         body = f"{user.name} added to ping ban for all possible servers."
@@ -7698,23 +7699,23 @@ async def userpingban(ctx, user: discord.User):
 
 @Cheddlatron.command(description=f"Bans a user who pings you in the server this commands was used in. \nUsage: {config_get('prefix')}serverpingban", help="utility")
 async def serverpingban(ctx):
-    with open('Data\Settings\Configs\Settings.json', 'r') as file:
+    with open('Data/Settings/Configs/Settings.json', 'r') as file:
         settings_data = json.load(file)
     if 'serverpingban' not in settings_data:
         settings_data['serverpingban'] = []
-        with open('Data\Settings\Configs\Settings.json', 'w') as file:
+        with open('Data/Settings/Configs/Settings.json', 'w') as file:
             json.dump(settings_data, file, indent=4)
     if ctx.guild.me.guild_permissions.ban_members:
         if ctx.guild.id in settings_data['serverpingban']:
             settings_data['serverpingban'].remove(ctx.guild.id)  
-            with open('Data\Settings\Configs\Settings.json', 'w') as file: 
+            with open('Data/Settings/Configs/Settings.json', 'w') as file: 
                 json.dump(settings_data, file, indent=4)
             heading = f"Server Ping Ban"
             body = f"{ctx.guild.name} removed from ping ban list."
             cmdname = "serverpingban"
         else:
             settings_data['serverpingban'].append(ctx.guild.id)
-            with open('Data\Settings\Configs\Settings.json', 'w') as file:  
+            with open('Data/Settings/Configs/Settings.json', 'w') as file:  
                 json.dump(settings_data, file, indent=4)
             heading = f"Server Ping Ban"
             body = f"{ctx.guild.name} added to ping ban list."
@@ -7727,23 +7728,23 @@ async def serverpingban(ctx):
 
 @Cheddlatron.command(description=f"Kicks any user who pings you in the server this commands was used in. \nUsage: {config_get('prefix')}serverpingkick", help="utility")
 async def serverpingkick(ctx):
-    with open('Data\Settings\Configs\Settings.json', 'r') as file:
+    with open('Data/Settings/Configs/Settings.json', 'r') as file:
         settings_data = json.load(file)
     if 'serverpingkick' not in settings_data:
         settings_data['serverpingkick'] = []
-        with open('Data\Settings\Configs\Settings.json', 'w') as file:
+        with open('Data/Settings/Configs/Settings.json', 'w') as file:
             json.dump(settings_data, file, indent=4)
     if ctx.guild.me.guild_permissions.ban_members:
         if ctx.guild.id in settings_data['serverpingkick']:
             settings_data['serverpingkick'].remove(ctx.guild.id)  
-            with open('Data\Settings\Configs\Settings.json', 'w') as file: 
+            with open('Data/Settings/Configs/Settings.json', 'w') as file: 
                 json.dump(settings_data, file, indent=4)
             heading = f"Server Ping Kick"
             body = f"{ctx.guild.name} removed from ping kick list."
             cmdname = "serverpingkick"
         else:
             settings_data['serverpingkick'].append(ctx.guild.id)
-            with open('Data\Settings\Configs\Settings.json', 'w') as file:  
+            with open('Data/Settings/Configs/Settings.json', 'w') as file:  
                 json.dump(settings_data, file, indent=4)
             heading = f"Server Ping Kick"
             body = f"{ctx.guild.name} added to ping kick list."
@@ -7756,23 +7757,23 @@ async def serverpingkick(ctx):
 
 @Cheddlatron.command(description=f"Kicks a user who pings you in the server they pinged you from. \nUsage: {config_get('prefix')}userpingkick", help="utility")
 async def userpingkick(ctx, user: discord.User):
-    with open('Data\Settings\Configs\Settings.json', 'r') as file:
+    with open('Data/Settings/Configs/Settings.json', 'r') as file:
         settings_data = json.load(file)
     if 'userpingkick' not in settings_data:
         settings_data['userpingkick'] = []
-        with open('Data\Settings\Configs\Settings.json', 'w') as file:
+        with open('Data/Settings/Configs/Settings.json', 'w') as file:
             json.dump(settings_data, file, indent=4)
 
     if user.id in settings_data['userpingkick']:
         settings_data['userpingkick'].remove(user.id)  
-        with open('Data\Settings\Configs\Settings.json', 'w') as file: 
+        with open('Data/Settings/Configs/Settings.json', 'w') as file: 
             json.dump(settings_data, file, indent=4)
         heading = f"User Ping Kick"
         body = f"{user.name} removed from ping kick from all possible servers."
         cmdname = "userpingkick"
     else:
         settings_data['userpingkick'].append(user.id)
-        with open('Data\Settings\Configs\Settings.json', 'w') as file:  
+        with open('Data/Settings/Configs/Settings.json', 'w') as file:  
             json.dump(settings_data, file, indent=4)
         heading = f"User Ping Kick"
         body = f"{user.name} added to ping kick for all possible servers."
@@ -7789,23 +7790,23 @@ async def logchannel(ctx, id=None):
             return
     channel_id = int(id) if id else ctx.channel.id
     channel = Cheddlatron.get_channel(channel_id)   
-    with open('Data\Settings\Configs\Settings.json', 'r') as file:
+    with open('Data/Settings/Configs/Settings.json', 'r') as file:
         settings_data = json.load(file)
     if 'msglogids' not in settings_data:
         settings_data['msglogids'] = []
-        with open('Data\Settings\Configs\Settings.json', 'w') as file:
+        with open('Data/Settings/Configs/Settings.json', 'w') as file:
             json.dump(settings_data, file, indent=4)
 
     if channel_id in settings_data['msglogids']:
         settings_data['msglogids'].remove(channel_id)  
-        with open('Data\Settings\Configs\Settings.json', 'w') as file: 
+        with open('Data/Settings/Configs/Settings.json', 'w') as file: 
             json.dump(settings_data, file, indent=4)
         heading = f"Channel Log"
         body = f"Stopped logging {channel.name}"
         cmdname = "logchannel"
     else:
         settings_data['msglogids'].append(channel_id)
-        with open('Data\Settings\Configs\Settings.json', 'w') as file:  
+        with open('Data/Settings/Configs/Settings.json', 'w') as file:  
             json.dump(settings_data, file, indent=4)
         heading = f"Channel Log"
         body = f"Now logging {channel.name}"
