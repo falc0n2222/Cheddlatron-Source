@@ -1,4 +1,5 @@
 # Cheddlatron Source
+## The bot will throw a warning if you don't have an active RPC, you can safely ignore it as I can't be bothered to fix it rn
 
 The Official Source Code for Cheddlatron Selfbot.
 
