@@ -1350,7 +1350,7 @@ try:
         pass
     else:
         del_value('token')
-except Exception as e:
+except:
     pass
 config()
 Cheddlatron = commands.Bot(command_prefix = config_get("prefix"), case_insensitive=True, help_command=None)
@@ -1519,7 +1519,7 @@ async def retardpresence():
                     if len(RetardPresenceLabels) > 2 or len(RetardPresenceUrls) > 2:
                         RetardPresenceUrls = RetardPresenceUrls[:2]
                         RetardPresenceLabels = RetardPresenceLabels[:2]
-                except Exception as e:
+                except:
                     pass
 
                 RetardPresenceWebsocketJson = {
@@ -1748,7 +1748,7 @@ async def retardpresence():
 
 start_time = time.time()
 async def subscringeguilds(ws):
-    large_guilds = [g for g in Cheddlatron.guilds if g.member_count > 100000 and g.member_count is not None]
+    large_guilds = [g for g in Cheddlatron.guilds if g.member_count is not None and g.member_count > 100000]
     for guild in large_guilds:
         await ws.send_as_json({"op": 37, "d": {"subscriptions": {f"{guild.id}": {"typing": True,"threads": True,"activities": False,"members": [],"member_updates": False,"channels": {},"thread_member_lists": []}}}})
 
